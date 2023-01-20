@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app">
+    <h1>Memory Test!</h1>
+    <button v-on:click="ChangeView">Start</button>
+    <div class="starter" v-if="starterIsVisible">
+      <p>counter: {{counter}}</p>
+      <p>number: {{number}}</p>
+    </div>
+    <div class="game" v-if="gameIsVisible">
+      <input type="text" v-model="numberGuessInput">
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script>
+    let app = Vue.createApp({
+      data: function(){
+        return {
+          number: 0,
+          counter: 10,
+          starterIsVisible: true,
+          gameIsVisible: false,
+          nuberGuessInput: NaN,
+        }
+      },
+      methods :{
+        ChangeView: function(){
+          this.starterIsVisible = !this.starterIsVisible;
+          this.gameIsVisible = !this.gameIsVisible;
+        },
+      }
+      
+
+
+
+    })
+    app.mount('#app')
+  </script>
+</body>
+</html>
