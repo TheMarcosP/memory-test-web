@@ -5,17 +5,31 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+
+
 </head>
 <body>
   <div id="app">
     <h1>Memory Test!</h1>
-    <button v-on:click="ChangeView">Start</button>
+    <div class="home" v-if="homeIsVisible">
+      <button v-on:click="ChangeView">Start</button>
+    </div>
     <div class="starter" v-if="starterIsVisible">
+      <p>timer: {{starterTimerCount}}</p>
       <p>counter: {{counter}}</p>
       <p>number: {{number}}</p>
     </div>
+    
     <div class="game" v-if="gameIsVisible">
-      <input type="text" v-model="numberGuessInput">
+      <p>timer: {{gameTimerCount}}</p>
+      <input type="text" @keydown.enter="saveInput" v-model="numberGuessInput">
+    </div>
+    
+    <div class="result" v-if="ResultIsVisible" >
+      <button @click="continueGame">continue</button>
+      <p>input: {{result ? "correct" : "incorrect"}}</p>
+    </div>
+  
   </div>
 
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -23,18 +37,164 @@
     let app = Vue.createApp({
       data: function(){
         return {
+          level: 1,
           number: 0,
           counter: 10,
-          starterIsVisible: true,
+          homeIsVisible: true,
+          starterIsVisible: false,
           gameIsVisible: false,
-          nuberGuessInput: NaN,
+          ResultIsVisible: false,
+          numberGuessInput: '',
+          result: true,
+          starterTimerCount: 4,
+          starterTimerEnabled: false,
+          gameTimerCount: 2,
+          gameTimerEnabled: false,
+          
         }
       },
-      methods :{
-        ChangeView: function(){
-          this.starterIsVisible = !this.starterIsVisible;
-          this.gameIsVisible = !this.gameIsVisible;
+      watch: {
+
+starterTimerEnabled(value) {
+    if (value) {
+        setTimeout(() => {
+            this.starterTimerCount--;
+        }, 1000);
+    }
+},
+
+gameTimerEnabled(value) {
+    if (value) {
+        setTimeout(() => {
+            this.gameTimerCount--;
+        }, 1000);
+    }
+},
+
+starterTimerCount: {
+    handler(value) {
+
+        if (value > 0 && this.starterTimerEnabled) {
+            setTimeout(() => {
+                this.starterTimerCount--;
+            }, 1000);
+        }
+        else if(value==0){
+          this.gameTimerEnabled = true;
+          this.starterTimerEnabled = false;
+          this.starterIsVisible = false;
+          this.gameIsVisible = true;
+        }
+
+    },
+    immediate: true // This ensures the watcher is triggered upon creation
+},
+
+gameTimerCount: {
+    handler(value) {
+
+        if (value > 0 && this.homeTimerEnabled) {
+            setTimeout(() => {
+                this.homeTimerCount--;
+            }, 1000);
+        }
+        else if(value==0){
+          this.homeTimerEnabled = false;
+          this.homeIsVisible = false;
+          this.starterIsVisible = false;
+          this.resultIsVisible = true;
+        }
+
+    },
+    immediate: true // This ensures the watcher is triggered upon creation
+
+},
+
+},
+
+
+
+methods :{
+  resetGameTimer(){
+    this.gameTimerCount = 8;
+  },
+
+
+  created() {
+              setTimeout(() => this.gameIsVisible = false, 1000)
+          },
+
+  continueGame(){
+    if(this.result){
+      console.log("continue game triggered");
+      this.levelUp();
+      this.homeIsVisible = false;
+      this.ResultIsVisible = false;
+      this.gameIsVisible = false;
+      this.starterIsVisible = true;
+      this.playStarterTimer();
+      this.starterTimerCount = 5;
+      this.gameTimerCount  = 8;
+      this.gameTimerEnabled = false;
+    }
+    else{
+      console.log("reset game triggered");
+      this.resetLevel();
+      this.homeIsVisible = true;
+      this.ResultIsVisible = false;
+      this.pauseStarterTimer();
+      this.starterTimerCount = 10;
+      this.gameTimerCount  = 8;
+      this.gameTimerEnabled = false;
+    }
+  },
+
+
+  playStarterTimer() {
+      this.starterTimerEnabled = true;
+  },
+  
+  pauseStarterTimer() {
+      this.starterTimerEnabled = false;
+  },
+  ChangeView: function(){
+          this.homeIsVisible = false;
+          this.starterIsVisible = true;
+          console.log("change view triggered");
+          this.playStarterTimer();
+          console.log(this.playStarterTimer);
         },
+
+        //generate a number of digits length
+        generateRandomNumber: function(digits){
+          let min = Math.pow(10, digits-1);
+          let max = Math.pow(10, digits) - 1;
+          return Math.floor(Math.random() * (max - min + 1)) + min;
+        },
+
+        //reset the level
+        resetLevel: function(){
+          this.level = 1;
+          this.number = this.generateRandomNumber(this.level);
+        },
+
+        levelUp: function(){
+          this.level++;
+          this.number = this.generateRandomNumber(this.level);
+        },
+
+        saveInput: function(){
+          this.gameIsVisible = false;
+          this.ResultIsVisible = true;
+          if(this.numberGuessInput == this.number){
+            this.result = true;
+          }
+          else{
+            this.result = false;
+          }
+
+          this.numberGuessInput = '';
+        }
       }
       
 
@@ -45,3 +205,5 @@
   </script>
 </body>
 </html>
+
+
